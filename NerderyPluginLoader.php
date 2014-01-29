@@ -52,11 +52,33 @@ class NerderyPluginLoader
         $this->set_plugin_source();
 
         $this->get_available_plugins();
+
+    }
+
+
+
+    public function get_available_plugins()
+    {
+        // get option
+                // if no option refresh src
+        // include those files
+    }
+    /***************************************************************************
+    ****    READING THE SRC DIRECTORY AND VERIFYING FILES
+    **************************************************************************/
+    public function refresh_available_plugins()
+    {
+        $this->read_source();
         $this->filter_unwanted_files();
         $this->check_file_existence();
     }
 
-    public function get_available_plugins()
+    public function set_plugin_source()
+    {
+        define('NPL_SRC', NPL_PATH . 'src/');
+    }
+
+    public function read_source()
     {
         $this->plugins_available = scandir(NPL_SRC);
     }
@@ -64,11 +86,7 @@ class NerderyPluginLoader
     public function check_file_existence()
     {
         foreach ( $this->plugins_available as $key=>$possible_plugin ) {
-
-            $possible_plugin_path =
-                NPL_SRC . $possible_plugin . '/' . $possible_plugin . '.php';
-
-            if (!file_exists($possible_plugin_path)) {
+            if (!file_exists($this->build_plugin_path($possible_plugin))) {
                 unset($this->plugins_available[$key]);
             }
         }
@@ -83,6 +101,13 @@ class NerderyPluginLoader
         }
     }
 
+    public function build_plugin_path( $found_folder_name )
+    {
+        return NPL_SRC . $found_folder_name . '/' . $found_folder_name . '.php';
+    }
+
+
+
     public function set_available_plugins()
     {
 
@@ -90,7 +115,9 @@ class NerderyPluginLoader
 
     public function get_enabled_plugins()
     {
-
+        if (!get_option(NPL_OPTION_NAME)) {
+            add_option(NPL_OPTION_NAME, array());
+        }
     }
 
     public function create_enabled_plugins_option()
@@ -100,10 +127,7 @@ class NerderyPluginLoader
         }
     }
 
-    public function set_plugin_source()
-    {
-        define('NPL_SRC', NPL_PATH . 'src/');
-    }
+
 
     public function on_activation()
     {
